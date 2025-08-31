@@ -5,10 +5,12 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 from dotenv import load_dotenv
+from chromedriver_py import binary_path
 
 # Configure logging to see more details
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -22,8 +24,8 @@ def get_pnr_screenshot(pnr):
     """
     Navigates to the PNR status page, takes a screenshot, and returns the filename.
     
-    NOTE: This version removes webdriver_manager as the Chrome driver is installed
-    during Render's build process using the seleniumbase command.
+    NOTE: This version uses chromedriver_py, a more reliable method for Render's
+    environment, as the Chrome driver is installed as part of the package.
     """
     options = Options()
     options.add_argument("--headless")
@@ -32,8 +34,9 @@ def get_pnr_screenshot(pnr):
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--log-level=3")
 
-    # The Chrome driver is already available in the environment from the build command.
-    driver = webdriver.Chrome(options=options)
+    # Use the chromedriver_py library to get the path to the executable
+    service = Service(binary_path)
+    driver = webdriver.Chrome(service=service, options=options)
     
     try:
         logging.info(f"Navigating to PNR page for {pnr}...")
