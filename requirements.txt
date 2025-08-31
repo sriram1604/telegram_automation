@@ -2,7 +2,7 @@ python-telegram-bot[webhooks]
 selenium
 webdriver-manager
 python-dotenv
-chromedriver-binary==139.0.7258.0
+webdriver-manager
 selenium
 pytesseract
 Pillow
