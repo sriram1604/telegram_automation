@@ -2,3 +2,8 @@ python-telegram-bot[webhooks]
 selenium
 webdriver-manager
 python-dotenv
+chromedriver-binary
+selenium
+pytesseract
+Pillow
+requests
