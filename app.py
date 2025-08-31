@@ -1,35 +1,39 @@
 import os
-from dotenv import load_dotenv
-import time
+import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
-import logging
+import time
+from dotenv import load_dotenv
 
 # Configure logging to see more details
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-
 load_dotenv()
 
-BOT_TOKEN = os.getenv("BOT_TOKEN") 
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 # --- Function to check PNR ---
 def get_pnr_screenshot(pnr):
-    options = webdriver.ChromeOptions()
+    """
+    Navigates to the PNR status page, takes a screenshot, and returns the filename.
+    
+    NOTE: This version removes webdriver_manager as the Chrome driver is installed
+    during Render's build process using the seleniumbase command.
+    """
+    options = Options()
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
-    options.add_argument("--log-level=3") 
+    options.add_argument("--log-level=3")
 
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
+    # The Chrome driver is already available in the environment from the build command.
+    driver = webdriver.Chrome(options=options)
     
     try:
         logging.info(f"Navigating to PNR page for {pnr}...")
