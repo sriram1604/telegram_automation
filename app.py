@@ -10,7 +10,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 from dotenv import load_dotenv
-from chromedriver_py import binary_path
 
 # Configure logging to see more details
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -24,8 +23,8 @@ def get_pnr_screenshot(pnr):
     """
     Navigates to the PNR status page, takes a screenshot, and returns the filename.
     
-    NOTE: This version uses chromedriver_py, a more reliable method for Render's
-    environment, as the Chrome driver is installed as part of the package.
+    This version configures the Chrome driver to work on a Render.com environment
+    by specifying the binary location directly, which is handled by the build script.
     """
     options = Options()
     options.add_argument("--headless")
@@ -34,23 +33,26 @@ def get_pnr_screenshot(pnr):
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--log-level=3")
 
-    # Use the chromedriver_py library to get the path to the executable
-    service = Service(binary_path)
+    # Set the path to the pre-installed Chrome binary
+    options.binary_location = "/opt/render/project/.render/chrome/opt/google/chrome/google-chrome"
+    
+    # Specify the driver's path directly, which is also available on Render
+    service = Service("/opt/render/project/.render/chrome/opt/google/chrome/chromedriver")
+    
     driver = webdriver.Chrome(service=service, options=options)
     
     try:
         logging.info(f"Navigating to PNR page for {pnr}...")
         driver.get(f"https://www.confirmtkt.com/pnr-status/{pnr}")
         
-        # We will try to wait for the PNR card, but if it fails, we will proceed anyway.
         try:
             WebDriverWait(driver, 30).until(
                 EC.presence_of_element_located((By.XPATH, "//div[@class='table-responsive pnr-status']"))
             )
             logging.info("PNR status table found. Waiting for a moment to let content load.")
             time.sleep(5)
-        except Exception:
-            logging.warning("PNR status table not found within timeout. Taking screenshot of the current page.")
+        except Exception as e:
+            logging.warning(f"PNR status table not found within timeout. Taking screenshot of the current page. Error: {e}")
         
         filename = f"pnr_{pnr}.png"
         driver.save_screenshot(filename)
