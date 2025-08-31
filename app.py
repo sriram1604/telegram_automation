@@ -91,13 +91,24 @@ async def handle_pnr(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 if __name__ == "__main__":
-    print("🤖 Bot is running with polling...")
+    print("🤖 Bot is running with webhook...")
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_pnr))
 
-    app.run_polling()
+    # Get the PORT Render provides
+    PORT = int(os.environ.get("PORT", 8080))
+
+    # Start webhook (replace YOUR_DOMAIN with your Render domain)
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        url_path=BOT_TOKEN,
+        webhook_url=f"https://{os.environ['RENDER_EXTERNAL_HOSTNAME']}/{BOT_TOKEN}"
+    )
+
+
 
 
 
